@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// استدعاء صفحة المحفوظات
+import '../../features/github/presentation/pages/explore_page.dart';
 import '../../features/github/presentation/pages/saved_page.dart';
 
 final appRouter = GoRouter(
@@ -37,18 +37,15 @@ final appRouter = GoRouter(
         );
       },
       branches: [
-        // الفرع الأول (Index 0): البحث
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/search',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Search Page'))),
+              builder: (context, state) => const ExplorePage(),
             ),
           ],
         ),
 
-        // الفرع الثاني (Index 1): المحفوظات
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -58,7 +55,6 @@ final appRouter = GoRouter(
           ],
         ),
 
-        // الفرع الثالث (Index 2): البروفايل
         StatefulShellBranch(
           routes: [
             GoRoute(

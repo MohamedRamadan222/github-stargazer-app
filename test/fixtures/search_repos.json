@@ -1,0 +1,14 @@
+{
+  "total_count": 1,
+  "items": [
+    {
+      "id": 12345,
+      "name": "flutter",
+      "full_name": "flutter/flutter",
+      "owner": { "id": 1, "login": "flutter", "avatar_url": "https://url" },
+      "description": "Flutter makes it easy and fast to build beautiful apps.",
+      "stargazers_count": 150000,
+      "language": "Dart"
+    }
+  ]
+}
