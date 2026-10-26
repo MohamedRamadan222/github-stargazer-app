@@ -21,13 +21,14 @@ class SavedRepositoryImpl implements SavedRepository {
   }
 
   @override
-
   Future<Either<Failure, void>> saveRepo(GithubRepo repo) async {
     try {
       await localDataSource.saveRepo(SavedRepoModel.fromEntity(repo));
       return const Right(null);
     } catch (e) {
-      print('🔥 خطأ في الـ Hive أثناء الحفظ: $e'); // السطر ده هيكشفلنا لو في مصيبة
+      print(
+        '🔥 خطأ في الـ Hive أثناء الحفظ: $e',
+      ); // السطر ده هيكشفلنا لو في مصيبة
       return const Left(ServerFailure('فشل في حفظ المستودع'));
     }
   }

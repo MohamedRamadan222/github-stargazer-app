@@ -20,15 +20,17 @@ class DioClient {
         },
         onResponse: ((response, handler) {
           final remaining = response.headers.value('x-ratelimit-remaining');
-          if(remaining == '0'){
+          if (remaining == '0') {
             final resetString = response.headers.value('x-ratelimit-reset');
-            if(resetString != null){
-              final resetTime = DateTime.fromMillisecondsSinceEpoch(int.parse(resetString) * 1000);
+            if (resetString != null) {
+              final resetTime = DateTime.fromMillisecondsSinceEpoch(
+                int.parse(resetString) * 1000,
+              );
               throw RateLimitException(resetTime: resetTime);
             }
           }
           return handler.next(response);
-        })
+        }),
       ),
     );
   }

@@ -39,15 +39,17 @@ class SavedReposNotifier extends StateNotifier<AsyncValue<List<GithubRepo>>> {
   final SaveRepoUseCase _saveRepo;
   final RemoveRepoUseCase _removeRepo;
 
-  SavedReposNotifier(this._getSaved, this._saveRepo, this._removeRepo) : super(const AsyncValue.loading()) {
+  SavedReposNotifier(this._getSaved, this._saveRepo, this._removeRepo)
+    : super(const AsyncValue.loading()) {
     loadSavedRepos();
   }
 
   void loadSavedRepos() {
     final result = _getSaved();
     result.fold(
-          (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
-          (repos) {
+      (failure) =>
+          state = AsyncValue.error(failure.message, StackTrace.current),
+      (repos) {
         // الـ [...] بتجبر ريفر بود إنه يشوفها قائمة جديدة فيعمل Rebuild للشاشة
         state = AsyncValue.data([...repos]);
       },
@@ -64,8 +66,8 @@ class SavedReposNotifier extends StateNotifier<AsyncValue<List<GithubRepo>>> {
     } else {
       final result = await _saveRepo(repo);
       result.fold(
-            (failure) => print('❌ فشل الحفظ: ${failure.message}'),
-            (_) => print('✅ تم الحفظ بنجاح!'),
+        (failure) => print('❌ فشل الحفظ: ${failure.message}'),
+        (_) => print('✅ تم الحفظ بنجاح!'),
       );
     }
     loadSavedRepos(); // تحديث القائمة بعد الإضافة أو الحذف

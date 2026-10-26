@@ -7,7 +7,6 @@ part 'github_repo_model.g.dart';
 
 @JsonSerializable()
 class GithubRepoModel extends GithubRepo {
-
   // ignore: overridden_fields
   @override
   final GithubUserModel owner;

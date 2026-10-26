@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import '../../../../core/domain/entities/github_user.dart';
 
 part 'github_user_model.g.dart';

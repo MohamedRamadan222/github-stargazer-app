@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/github/presentation/pages/explore_page.dart';
+import '../../features/github/presentation/pages/repo_details_page.dart';
 import '../../features/github/presentation/pages/saved_page.dart';
+import '../domain/entities/github_repo.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/search',
@@ -65,6 +67,11 @@ final appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/details',
+      builder: (context, state) =>
+          RepoDetailsPage(repo: state.extra as GithubRepo),
     ),
   ],
 );
