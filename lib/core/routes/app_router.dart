@@ -63,7 +63,8 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/profile',
               // غير 'MohamedRamadan222' لليوزرنيم الحقيقي بتاعك
-              builder: (context, state) => const ProfilePage(username: 'MohamedRamadan222'),
+              builder: (context, state) =>
+                  const ProfilePage(username: 'MohamedRamadan222'),
             ),
           ],
         ),

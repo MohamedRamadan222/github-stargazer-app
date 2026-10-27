@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class FilterChipe extends StatelessWidget {
-  const FilterChipe({super.key,
+  const FilterChipe({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,

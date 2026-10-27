@@ -1,80 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/custom_loading_indicator.dart';
 import '../../../../core/presentation/widgets/repo_card.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../domain/saved_widgets/empty_state.dart';
+import '../../domain/saved_widgets/header.dart';
 import '../providers/saved_repos_provider.dart';
-import '../../../../core/domain/entities/github_repo.dart';
-import '../../../../core/domain/entities/github_user.dart';
-
-import 'dart:math';
 
 class SavedPage extends ConsumerWidget {
   const SavedPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final savedReposState = ref.watch(savedReposProvider);
+    final savedState = ref.watch(savedReposProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('المحفوظات')),
-      body: savedReposState.when(
-        data: (repos) {
-          if (repos.isEmpty) {
-            return const Center(child: Text('مفيش مستودعات محفوظة لسة'));
-          }
-          return ListView.builder(
-            itemCount: repos.length,
-            itemBuilder: (context, index) {
-              final repo = repos[index];
-              return Dismissible(
-                key: Key('${repo.id}'),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: savedState.when(
+          loading: () => const CustomLoadingIndicator(),
+          error: (err, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(err.toString(), textAlign: TextAlign.center),
+            ),
+          ),
+          data: (repos) => CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                sliver: SliverToBoxAdapter(child: Header(count: repos.length)),
+              ),
+              if (repos.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyState(),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                  sliver: SliverList.separated(
+                    itemCount: repos.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final repo = repos[index];
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Dismissible(
+                          key: ValueKey(repo.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Theme.of(context).colorScheme.error,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(
+                              Icons.delete_outline,
+                              color: AppColors.surface,
+                            ),
+                          ),
+                          onDismissed: (_) => ref
+                              .read(savedReposProvider.notifier)
+                              .toggleSave(repo),
+                          child: RepoCard(repo: repo),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                onDismissed: (_) =>
-                    ref.read(savedReposProvider.notifier).toggleSave(repo),
-                child: RepoCard(repo: repo),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text(err.toString())),
-      ),
-      // زرار مؤقت عشان نجرب نضيف داتا وهمية
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final randomId = Random().nextInt(
-            1000000,
-          ); // رقم عشوائي مسموح بيه في Hive
-
-          final dummyRepo = GithubRepo(
-            id: randomId, // استخدمنا الرقم العشوائي هنا
-            name: 'Dummy Repo $randomId',
-            fullName: 'User/Dummy Repo $randomId',
-            description: 'تجربة حفظ أوفلاين',
-            stargazersCount: 1500,
-            language: 'Dart',
-            owner: const GithubUser(
-              id: 1,
-              login: 'User',
-              avatarUrl: 'https://github.com/flutter.png',
-            ),
-          );
-
-          ref.read(savedReposProvider.notifier).toggleSave(dummyRepo);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('جاري إضافة مستودع وهمي...'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
+            ],
+          ),
+        ),
       ),
     );
   }
