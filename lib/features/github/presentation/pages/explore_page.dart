@@ -7,10 +7,13 @@ import '../../../../core/presentation/widgets/rate_limit_widget.dart';
 import '../../../../core/presentation/widgets/repo_card.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/debouncer.dart';
+import '../explore_widgets/filter_chip.dart';
 import '../explore_widgets/footer.dart';
 import '../explore_widgets/header.dart';
-import '../explore_widgets/person_card.dart';
+import '../explore_widgets/hero.dart';
+import '../explore_widgets/people_section.dart';
 import '../explore_widgets/search_field.dart';
+import '../explore_widgets/section_header.dart';
 import '../explore_widgets/week_drop_down.dart';
 import '../providers/explore_provider.dart';
 
@@ -99,17 +102,17 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                           (_Filter.repositories, 'Repositories'),
                           (_Filter.people, 'People'),
                         ])
-                          _FilterChip(
+                          FilterChipe(
                             label: label,
                             selected: _filter == f,
                             onTap: () => setState(() => _filter = f),
                           ),
                       ],
                     ),
-                    if (isIdle) ...[const SizedBox(height: 28), const _Hero()],
+                    if (isIdle) ...[const SizedBox(height: 28), const Heroo()],
                     if (showRepos) ...[
                       const SizedBox(height: 28),
-                      _SectionHeader(
+                      SectionHeader(
                         title: isIdle ? 'Trending repositories' : 'Results',
                         trailing: isIdle ? const WeekDropdown() : null,
                       ),
@@ -177,7 +180,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             if (showPeople)
               const SliverPadding(
                 padding: EdgeInsets.fromLTRB(20, 28, 20, 0),
-                sliver: SliverToBoxAdapter(child: _PeopleSection()),
+                sliver: SliverToBoxAdapter(child: PeopleSection()),
               ),
             const SliverPadding(
               padding: EdgeInsets.fromLTRB(20, 24, 20, 32),
@@ -186,141 +189,6 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primarySoft : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? AppColors.primarySoft : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: selected ? AppColors.primary : AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Hero extends StatelessWidget {
-  const _Hero();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-            ),
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: Icon(Icons.explore_outlined, color: AppColors.primary),
-            ),
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Good things start with curiosity.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'Find your next idea, project, or collaborator.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
-
-  final String title;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        ?trailing,
-      ],
-    );
-  }
-}
-
-class _PeopleSection extends StatelessWidget {
-  const _PeopleSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionHeader(
-          title: 'People to know',
-          trailing: GestureDetector(
-            onTap: () {},
-            child: const Text(
-              'See all',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        const PersonCard(name: 'shadcn', bio: 'Building things for the web.'),
-      ],
     );
   }
 }
