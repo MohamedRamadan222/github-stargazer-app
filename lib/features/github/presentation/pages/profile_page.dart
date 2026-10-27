@@ -1,108 +1,192 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/presentation/widgets/custom_loading_indicator.dart';
 import '../../../../core/presentation/widgets/repo_card.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../profile_widgets/profile_header.dart';
+import '../profile_widgets/tabs.dart';
 import '../providers/profile_provider.dart';
 
-class ProfilePage extends ConsumerWidget {
-  final String username;
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key, required this.username});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profileState = ref.watch(profileProvider(username));
+  final String username;
 
-    // 1. حالة التحميل
-    if (profileState.isLoading) {
-      return const Scaffold(body: CustomLoadingIndicator());
+  @override
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(profileProvider(widget.username));
+
+    if (state.isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: CustomLoadingIndicator(),
+      );
     }
 
-    // 2. حالة الخطأ
-    if (profileState.error != null) {
+    if (state.error != null) {
       return Scaffold(
+        backgroundColor: AppColors.background,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(profileState.error!, style: const TextStyle(color: Colors.red, fontSize: 16)),
-              ElevatedButton(
-                onPressed: () => ref.read(profileProvider(username).notifier).loadProfile(username),
-                child: const Text('إعادة المحاولة'),
-              )
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => ref
+                      .read(profileProvider(widget.username).notifier)
+                      .loadProfile(widget.username),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    // 3. حالة عدم وجود بيانات (التأمين)
-    if (profileState.user == null) {
-      return const Scaffold(body: Center(child: Text('لم يتم العثور على بيانات المستخدم.')));
+    final user = state.user;
+    if (user == null) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: Text('User not found.')),
+      );
     }
 
-    // 4. عرض البيانات بنجاح
-    final user = profileState.user!;
+    final repos = switch (_tab) {
+      0 => state.repos.take(2).toList(),
+      1 => state.repos,
+      _ => state.starred,
+    };
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(user.login),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Top Repos'),
-              Tab(text: 'Starred'),
-            ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Material(
+              color: AppColors.surface,
+              shape: const CircleBorder(
+                side: BorderSide(color: AppColors.border),
+              ),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {},
+                child: const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: Icon(
+                    Icons.more_horiz,
+                    size: 20,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(radius: 40, backgroundImage: NetworkImage(user.avatarUrl)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ProfileHeader(
+                    avatarUrl: user.avatarUrl,
+                    name: user.name ?? user.login,
+                    login: user.login,
+                    bio: user.bio,
+                    followers: user.followers,
+                    following: user.following,
+                  ),
+                  const SizedBox(height: 20),
+                  Tabs(
+                    selected: _tab,
+                    onChanged: (i) => setState(() => _tab = i),
+                    reposCount: state.repos.length,
+                    starsCount: state.starred.length,
+                  ),
+                  const SizedBox(height: 20),
+                  if (_tab == 0) ...[
+                    const Row(
                       children: [
-                        Text(user.name ?? user.login, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        if (user.bio != null) Text(user.bio!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(Icons.people, size: 16),
-                            const SizedBox(width: 4),
-                            Text('${user.followers} Followers • ${user.following} Following'),
-                          ],
+                        Expanded(
+                          child: Text(
+                            'Pinned repositories',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.push_pin_outlined,
+                          size: 18,
+                          color: AppColors.textHint,
                         ),
                       ],
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            sliver: repos.isEmpty
+                ? const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Center(child: Text('No repositories.')),
+                    ),
+                  )
+                : SliverList.separated(
+                    itemCount: repos.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (_, i) => RepoCard(repo: repos[i]),
                   ),
-                ],
-              ),
-            ),
-            const Divider(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildRepoList(profileState.repos),
-                  _buildRepoList(profileState.starred),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildRepoList(List repos) {
-    if (repos.isEmpty) return const Center(child: Text('لا توجد مستودعات.'));
-    return ListView.builder(
-      itemCount: repos.length,
-      itemBuilder: (context, index) => RepoCard(repo: repos[index]),
     );
   }
 }
