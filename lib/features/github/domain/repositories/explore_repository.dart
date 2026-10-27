@@ -8,13 +8,17 @@ import '../../../../core/domain/entities/github_user.dart';
 abstract class ExploreRepository {
   Future<Either<Failure, List<GithubRepo>>> searchRepos(
     String query, {
+    int page = 1,
     CancelToken? cancelToken,
   });
+
+  Future<Either<Failure, List<GithubRepo>>> getTrendingRepos({
+    int page = 1,
+    CancelToken? cancelToken,
+  });
+
   Future<Either<Failure, List<GithubUser>>> searchUsers(
     String query, {
-    CancelToken? cancelToken,
-  });
-  Future<Either<Failure, List<GithubRepo>>> getTrendingRepos({
     CancelToken? cancelToken,
   });
 }

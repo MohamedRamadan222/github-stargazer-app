@@ -9,7 +9,10 @@ class GetTrendingReposUseCase {
   final ExploreRepository repository;
   GetTrendingReposUseCase(this.repository);
 
-  Future<Either<Failure, List<GithubRepo>>> call({CancelToken? cancelToken}) {
-    return repository.getTrendingRepos(cancelToken: cancelToken);
+  Future<Either<Failure, List<GithubRepo>>> call({
+    int page = 1,
+    CancelToken? cancelToken,
+  }) {
+    return repository.getTrendingRepos(page: page, cancelToken: cancelToken);
   }
 }

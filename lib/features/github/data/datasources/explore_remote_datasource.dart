@@ -7,13 +7,19 @@ import '../models/github_user_model.dart';
 abstract class ExploreRemoteDatasource {
   Future<List<GithubRepoModel>> searchRepos(
     String query, {
+    int page = 1,
     CancelToken? cancelToken,
   });
+
+  Future<List<GithubRepoModel>> getTrendingRepos({
+    int page = 1,
+    CancelToken? cancelToken,
+  });
+
   Future<List<GithubUserModel>> searchUsers(
     String query, {
     CancelToken? cancelToken,
   });
-  Future<List<GithubRepoModel>> getTrendingRepos({CancelToken? cancelToken});
 }
 
 class ExploreRemoteDatasourceImpl implements ExploreRemoteDatasource {
@@ -24,11 +30,12 @@ class ExploreRemoteDatasourceImpl implements ExploreRemoteDatasource {
   @override
   Future<List<GithubRepoModel>> searchRepos(
     String query, {
+    int page = 1,
     CancelToken? cancelToken,
   }) async {
     final response = await dioClient.dio.get(
       '/search/repositories',
-      queryParameters: {'q': query, 'per_page': 20},
+      queryParameters: {'q': query, 'page': page, 'per_page': 20},
       cancelToken: cancelToken,
     );
     return (response.data['items'] as List)
@@ -53,18 +60,17 @@ class ExploreRemoteDatasourceImpl implements ExploreRemoteDatasource {
 
   @override
   Future<List<GithubRepoModel>> getTrendingRepos({
+    int page = 1,
     CancelToken? cancelToken,
   }) async {
-    final date = DateTime.now().subtract(const Duration(days: 30));
-    final formattedDate =
-        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
+    // التاريخ ممكن تغيره حسب رغبتك
     final response = await dioClient.dio.get(
       '/search/repositories',
       queryParameters: {
-        'q': 'created:>$formattedDate',
+        'q': 'created:>2024-01-01',
         'sort': 'stars',
         'order': 'desc',
+        'page': page,
         'per_page': 20,
       },
       cancelToken: cancelToken,

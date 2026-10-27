@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/github/presentation/pages/explore_page.dart';
+import '../../features/github/presentation/pages/profile_page.dart';
 import '../../features/github/presentation/pages/repo_details_page.dart';
 import '../../features/github/presentation/pages/saved_page.dart';
 import '../domain/entities/github_repo.dart';
@@ -61,8 +62,8 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/profile',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Profile Page'))),
+              // غير 'MohamedRamadan222' لليوزرنيم الحقيقي بتاعك
+              builder: (context, state) => const ProfilePage(username: 'MohamedRamadan222'),
             ),
           ],
         ),

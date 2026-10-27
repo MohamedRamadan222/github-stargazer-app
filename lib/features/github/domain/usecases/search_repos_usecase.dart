@@ -11,8 +11,9 @@ class SearchReposUseCase {
 
   Future<Either<Failure, List<GithubRepo>>> call(
     String query, {
+    int page = 1,
     CancelToken? cancelToken,
   }) {
-    return repository.searchRepos(query, cancelToken: cancelToken);
+    return repository.searchRepos(query, page: page, cancelToken: cancelToken);
   }
 }
